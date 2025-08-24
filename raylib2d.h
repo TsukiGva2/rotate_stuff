@@ -8,6 +8,9 @@
     #define PI 3.14159265358979323846f
 #endif
 
+#define screen_log(x, y, h, fmt, ...) DrawText(\
+		TextFormat(fmt, __VA_ARGS__), x, y, h, PURPLE);
+
 typedef Vector2 vec;
 typedef float   scalar;
 #define VEC(x,y) (vec){x,y}

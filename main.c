@@ -12,10 +12,8 @@ typedef uint32_t uint;
 const uint W = SCREEN_WIDTH;
 const uint H = SCREEN_HEIGHT;
 
-// useful adjustment
 vec OFFSET = VEC(0, 0); // additional offset if wished
 
-// constants
 const vec ORIGIN = VEC(0, 0);
 const vec CENTER = VEC(.5, .5);
 const vec SCREEN = VEC(SCREEN_WIDTH, SCREEN_HEIGHT);
@@ -24,11 +22,12 @@ const vec SCREEN = VEC(SCREEN_WIDTH, SCREEN_HEIGHT);
 		vec_add(vec_mul(CENTER, SCREEN), v),\
 		OFFSET)
 
-// Vars
-vec mouse = VEC(0.0, 0.0);
-float radius = 100;
+vec mouse;
+vec mouse_vel;
+vec mouse_pos;
 
-// might do an array of stuff
+scalar radius = 100;
+
 Texture2D stuff;
 
 void init_window()
@@ -44,10 +43,13 @@ void init_textures()
 
 void update_stuff()
 {
-	vec mouse_point = vec_div(GetMousePosition(), SCREEN);
+	vec mouse_new;
 
-	// getting the vector: MOUSE_POINT - CENTER
-	mouse = vec_sub(mouse_point, CENTER);
+	mouse_new = vec_div(GetMousePosition(), SCREEN);
+	mouse_vel = vec_sub(mouse_new, mouse_pos);
+
+	mouse_pos = mouse_new;
+	mouse     = vec_sub(mouse_pos, CENTER);
 }
 
 void draw_circle(vec a, scalar r, Color color)
@@ -59,18 +61,29 @@ void draw_circle(vec a, scalar r, Color color)
 
 void draw_line(vec a, vec b, Color color)
 {
-	vec r, w, r2, w2;
+	vec r, w;
 
 	r = vec_sub(b, a);
 	w = vec_scale(vec_norm(r), radius);
 
-	DrawText(TextFormat("r = <%f,%f>", r.x, r.y), 50, 50, 30, RED);
-	DrawText(TextFormat("w = <%f,%f>", w.x, w.y), 50, 80, 30, PURPLE);
-
 	PROJECT(r);
 	PROJECT(w);
 
-	DrawLineEx(r, w, 3.0f, BLUE);
+	DrawLineEx(r, w, 3.0f, color);
+}
+
+void draw_mouse_vel(Color color)
+{
+	vec a, b;
+
+	a = mouse_pos;
+	b = vec_add(mouse_pos, vec_scale(mouse_vel, -10));
+
+	// no need to PROJECT here
+	a = vec_mul(a, SCREEN);
+	b = vec_mul(b, SCREEN);
+
+	DrawLineEx(a, b, 3.0f, color);
 }
 
 void draw_stuff()
@@ -79,7 +92,10 @@ void draw_stuff()
 	const int SH = stuff.height;
 
 	draw_circle(ORIGIN, radius, BLACK);
-	draw_line(ORIGIN, mouse, BLACK);
+
+	draw_line(ORIGIN, mouse, BLUE);
+
+	draw_mouse_vel(RED);
 }
 
 void clean_textures()
